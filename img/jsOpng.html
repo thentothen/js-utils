@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="source" style="background: green"></div>
+    <span style="color: red; font-weight: bold; font-size: 43px"
+      >Gomelon<span style="font-family: math; font-size: 49px">g</span
+      ><span style="font-size: 14px; position: relative; top: -24px"
+        >®</span
+      ></span
+    >
+    <script>
+      // 创建一个新的Image对象
+      var img = new Image();
+
+      // 设置要加载的图像URL
+      img.src = "./source.png"; // 这里将'image.jpg'替换为你想要解析的图像路径或URL
+      console.log(img);
+      document.querySelector("#source").appendChild(img);
+      // 当图像加载完成后触发load事件
+      img.onload = function () {
+        var canvas = document.createElement("canvas");
+
+        // 设置画布大小与图像相同
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // 获取2D上下文
+        var ctx = canvas.getContext("2d");
+
+        // 将图像绘制到画布上
+        ctx.drawImage(img, 0, 0);
+
+        // 从画布上提取像素数据
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        // 遍历每个像素点进行处理（此处省略）
+        for (var i = 0; i < imageData.data.length; i += 4) {
+          console.log(
+            imageData.data[i],
+            imageData.data[i + 1],
+            imageData.data[i + 2],
+            imageData.data[i + 3]
+          );
+          if (
+            Math.abs(imageData.data[i] - 255) < 20 &&
+            Math.abs(imageData.data[i + 1] - 28) < 190 &&
+            Math.abs(imageData.data[i + 2] - 36) < 150
+          ) {
+            imageData.data[i] = 255;
+            imageData.data[i + 1] = 30;
+            imageData.data[i + 2] = 39;
+          } else {
+            imageData.data[i + 3] = 1;
+          }
+          // if (
+          //   imageData.data[i] === 255 &&
+          //   imageData.data[i + 1] === 255 &&
+          //   imageData.data[i + 2] === 255
+          // ) {
+          //   imageData.data[i + 3] = 1;
+          // } else {
+          //   imageData.data[i] = 255;
+          //   imageData.data[i + 1] = 30;
+          //   imageData.data[i + 2] = 39;
+          // }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        document.querySelector("#source").appendChild(canvas);
+      };
+    </script>
+  </body>
+</html>
