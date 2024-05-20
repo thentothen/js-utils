@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="ball" class="ball" draggable="false"></div>
+    <script>
+      let draggable = false;
+      let _x = 0;
+      let _y = 0;
+      document.querySelector("#ball").onmousedown = (e) => {
+        _x = e.clientX - document.querySelector("#ball").offsetLeft;
+        _y = e.clientY - document.querySelector("#ball").offsetTop;
+        console.log(_x, _y);
+        draggable = true;
+      };
+      document.onmouseup = () => {
+        draggable = false;
+      };
+      document.onmousemove = (e) => {
+        if (!draggable) return;
+        if (e.screenX !== 0) {
+          document.querySelector("#ball").style.left = e.clientX - _x + "px";
+          document.querySelector("#ball").style.top = e.clientY - _y + "px";
+        }
+      };
+    </script>
+    <style>
+      .ball {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: red;
+        position: absolute;
+        left: 10px;
+        top: 10px;
+      }
+    </style>
+  </body>
+</html>

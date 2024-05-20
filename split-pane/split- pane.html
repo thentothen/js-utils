@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="split-pane">
+      <div id="split-left"></div>
+      <div id="split-bar"></div>
+      <div id="split-right"></div>
+    </div>
+    <script>
+      let dragable = false;
+      let start = 0;
+      let move = 0;
+      const mousedown = (e) => {
+        console.log(e);
+        start = e.clientX;
+        dragable = true;
+      };
+      const mouseup = () => {
+        dragable = false;
+      };
+      document
+        .querySelector("#split-bar")
+        .addEventListener("mousedown", mousedown);
+
+      document.onmouseup = () => {
+        dragable = false;
+      };
+      document.querySelector("#split-left").style.width = 300 + "px";
+      document.onmousemove = (e) => {
+        if (!dragable) return;
+        console.log(document.querySelector("#split-left"));
+        // move = e.clientX = start;
+        // start = e.clientX;
+        // console.log(
+        //   move / document.querySelector("#split-pane").clientWidth + "%"
+        // );
+        // document.querySelector("#split-left").style["flexBasic"] =
+        //   move / document.querySelector("#split-pane").clientWidth + "%";
+        document.querySelector("#split-left").style.width = e.clientX + "px";
+      };
+    </script>
+    <style>
+      #split-pane {
+        width: 100%;
+        height: 1000px;
+        display: flex;
+      }
+      #split-pane > div {
+        height: 100%;
+      }
+      #split-left {
+        background: red;
+      }
+      #split-right {
+        flex: 1;
+        background: green;
+      }
+      #split-bar {
+        width: 1px;
+        cursor: col-resize;
+        position: relative;
+      }
+      #split-bar::after {
+        content: "";
+        display: block;
+        width: 9px;
+        height: 100%;
+        left: -4px;
+        position: absolute;
+      }
+    </style>
+  </body>
+</html>

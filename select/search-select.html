@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div style="margin: 0 auto; margin-left: 100px">
+      <div style="margin: 0 auto; margin-left: 100px; position: relative">
+        <select id="origin" style="margin-left: 100px">
+          <option value="1">byd</option>
+          <option value="2">volvo</option>
+          <option value="3">geely</option>
+        </select>
+      </div>
+    </div>
+    <script>
+      const toSelect = (target) => {
+        const select = target;
+        const input = document.createElement("input");
+        for (let i = 0; i < target.attributes.length; i++) {
+          input.setAttribute(
+            target.attributes[i].nodeName,
+            target.attributes[i].nodeValue
+          );
+        }
+        select.parentElement.replaceChild(
+          document.createElement("div").appendChild(input).parentNode,
+          select
+        );
+
+        const options = document.createElement("div");
+        options.setAttribute(
+          "style",
+          "display: none; position: absolute;background: #fff;border-radius: 4px;border: 1px solid; cursor: pointer;"
+        );
+        for (let i = 0; i < select.querySelectorAll("option").length; i++) {
+          const node = document.createElement("div");
+          node.innerHTML = select.querySelectorAll("option")[i].innerHTML;
+          node.setAttribute(
+            "value",
+            select.querySelectorAll("option")[i].attributes.value.value
+          );
+          options.appendChild(node);
+        }
+        document.body.appendChild(options);
+
+        input.onfocus = () => {
+          options.style.display = "block";
+          options.style.width = input.getBoundingClientRect().width + "px";
+          options.style.top =
+            input.getBoundingClientRect().y +
+            input.getBoundingClientRect().height +
+            5 +
+            "px";
+          options.style.left = input.getBoundingClientRect().x + "px";
+        };
+        input.onblur = () => {
+          setTimeout(() => {
+            options.style.display = "none";
+          }, 100);
+        };
+        input.oninput = () => {
+          for (let i = 0; i < options.children.length; i++) {
+            if (options.children[i].innerHTML.includes(input.value)) {
+              options.children[i].style.display = "block";
+            } else {
+              options.children[i].style.display = "none";
+            }
+          }
+        };
+        options.onclick = () => {
+          input.value = event.target.innerHTML;
+          input.setAttribute("data-value", event.target.attributes.value.value);
+        };
+      };
+
+      toSelect(document.querySelector("#origin"));
+    </script>
+  </body>
+  <style></style>
+</html>

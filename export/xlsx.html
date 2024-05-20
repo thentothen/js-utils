@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- npm install xlsx-js-style -->
+    <script lang="javascript" src="xlsx.bundle.js"></script>
+</head>
+<body>
+    <div ><button onclick="export1()">export</button></div>
+    <script>
+        let header = [['总结','总结','总结'],['信息','信息','备注'],['name','age','备注']]
+        let body = [
+            {name: 1, age: 20, title: '123'},
+            {name: 1, age: 20, title: '123'},
+            {name: 1, age: 20, title: '123'},
+            {name: 1, age: 20, title: '123'},
+        ]
+
+        let cellStyle = {
+            alignment: {
+                vertical: "middle", // 垂直居中
+                horizontal: "center" // 水平居中
+            },
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            }
+        };
+        function export1(){
+            console.log(XLSX);
+            const wb = XLSX.utils.book_new();
+
+            let data = header.map(i=>i).concat(body.map(obj=> Object.values(obj)))
+            console.log(data);
+            
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            ws["!cols"] = [ { wch: 10 } ];
+            ws['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } },
+                { s: { r: 1, c: 2 }, e: { r: 2, c: 2 } },
+            ]
+
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_address = { r: R, c: C };
+                    const cell_ref = XLSX.utils.encode_cell(cell_address);
+                    if (!ws[cell_ref]) continue;
+                    ws[cell_ref].s = cellStyle;
+                }
+            }
+            ws["A1"].s = {
+                font: { bold: true, italic: true },
+                fill: { fgColor: { rgb: "FFFFAA00" } }, // 黄色背景
+                border: { top: { style: "thin", color: { rgb: "FF000000" } } } // 黑色边框
+            };
+
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+            XLSX.writeFile(wb, "SheetJSESMTest.xlsx");
+        }
+        
+    </script>
+</body>
+
+</html>

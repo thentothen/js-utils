@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <!-- <div class="box1" style="">
+        <div  style="height: 100px;"></div>
+        <div  style="height: 50px;"></div>
+        <div  style="height: 100px;"></div>
+        <div  style="height: 100px;"></div>
+</div> -->
+    <div style="display: flex">
+      <div class="box box1">
+        <div></div>
+      </div>
+      <div class="box box2">
+        <div></div>
+      </div>
+    </div>
+    <script>
+      console.log($(".box1>div").height());
+      console.log($(".box2>div").height());
+
+      let arr = [100, 50, 100, 100, 100, 100, 50, 50, 100];
+      arr.forEach((item, index) => {
+        const minBox =
+          $(".box1>div").height() > $(".box2>div").height()
+            ? $(".box2>div")
+            : $(".box1>div");
+        minBox.append(
+          `<div style="height: ${item}px;font-size: 20px">${index}</div>`
+        );
+      });
+    </script>
+  </body>
+  <style>
+    .box {
+      display: flex;
+      flex-wrap: wrap;
+      width: 50%;
+      flex-direction: column;
+    }
+    .box > div > div {
+      /* width: 49%; */
+      width: 100%;
+      border: 1px solid red;
+    }
+  </style>
+</html>
