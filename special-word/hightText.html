@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="text">hover btn</div>
+</body>
+</html>
+<style>
+    * {
+        /* 将文档中所有元素的外边距和内边距初始化为0 */
+        margin: 0; padding: 0;
+    }
+
+    body {
+        /* 设置背景色为黑色 */
+        background-color: #000;
+    }
+    .text {
+        margin: 100px auto;
+        color: #999;
+        width: 200px;
+        height: 50px;
+        line-height: 50px;
+        background: linear-gradient( 
+            90deg, 
+        #f8eded, #f8eded,#f8eded, #f8eded, #f8eded,#f8eded, #f8eded,#f8eded,#f8eded, 
+        #ffffff,#ffffff,
+        #f8eded,#f8eded, #f8eded
+        );
+        background-size: 300%;
+        text-align: center;
+    }
+    .text:hover{
+        animation: move 3s;
+    }
+    @keyframes move {
+         /* 100%表示最终时间达到位置，%0可以省略，默认初始 */
+        0% {
+            background-position: -150% 0;
+        }
+        /* 100%表示最终时间达到位置，%0可以省略，默认初始 */
+        100% {
+            background-position: -300% 0;
+        }
+    }
+</style>
