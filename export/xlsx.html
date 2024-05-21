@@ -1,71 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <!-- npm install xlsx-js-style -->
     <script lang="javascript" src="xlsx.bundle.js"></script>
-</head>
-<body>
-    <div ><button onclick="export1()">export</button></div>
+  </head>
+  <body>
+    <div>
+      <button
+        onclick="export1({headerData:header, bodyData: bodyData, specialCell:specialCell})"
+      >
+        export
+      </button>
+    </div>
     <script>
-        let header = [['总结','总结','总结'],['信息','信息','备注'],['name','age','备注']]
-        let body = [
-            {name: 1, age: 20, title: '123'},
-            {name: 1, age: 20, title: '123'},
-            {name: 1, age: 20, title: '123'},
-            {name: 1, age: 20, title: '123'},
-        ]
+      let header = [
+        ["总结", "总结", "总结"],
+        ["信息", "信息", "备注"],
+        ["name", "age", "备注"],
+      ];
+      let bodyData = [
+        { name: 1, age: 20, title: "123" },
+        { name: 1, age: 18, title: "123" },
+        { name: 1, age: 25, title: "123" },
+        { name: 1, age: 30, title: "123" },
+      ];
 
-        let cellStyle = {
-            alignment: {
-                vertical: "middle", // 垂直居中
-                horizontal: "center" // 水平居中
-            },
-            border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } }
-            }
-        };
-        function export1(){
-            console.log(XLSX);
-            const wb = XLSX.utils.book_new();
+      let cellStyle = {
+        alignment: {
+          vertical: "middle", // 垂直居中
+          horizontal: "center", // 水平居中
+        },
+        border: {
+          top: { style: "thin", color: { rgb: "000000" } },
+          bottom: { style: "thin", color: { rgb: "000000" } },
+          left: { style: "thin", color: { rgb: "000000" } },
+          right: { style: "thin", color: { rgb: "000000" } },
+        },
+      };
+      let specialCell = {
+        A1: {
+          alignment: {
+            vertical: "middle", // 垂直居中
+            horizontal: "center", // 水平居中
+          },
+          font: { bold: true, italic: true },
+          fill: { fgColor: { rgb: "FFFFAA00" } }, // 黄色背景
+          border: { top: { style: "thin", color: { rgb: "FF000000" } } }, // 黑色边框
+        },
+      };
 
-            let data = header.map(i=>i).concat(body.map(obj=> Object.values(obj)))
-            console.log(data);
-            
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            ws["!cols"] = [ { wch: 10 } ];
-            ws['!merges'] = [
-                { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
-                { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } },
-                { s: { r: 1, c: 2 }, e: { r: 2, c: 2 } },
-            ]
+      function export1({
+        title = "SheetJSESMTest",
+        headerData = [],
+        bodyData = [],
+        specialCell = null,
+        specialCellFunc = null,
+      }) {
+        const wb = XLSX.utils.book_new();
+        let data = headerData
+          .map((i) => i)
+          .concat(bodyData.map((obj) => Object.values(obj)));
+        const ws = XLSX.utils.aoa_to_sheet(data);
 
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            for (let R = range.s.r; R <= range.e.r; ++R) {
-                for (let C = range.s.c; C <= range.e.c; ++C) {
-                    const cell_address = { r: R, c: C };
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    if (!ws[cell_ref]) continue;
-                    ws[cell_ref].s = cellStyle;
-                }
-            }
-            ws["A1"].s = {
-                font: { bold: true, italic: true },
-                fill: { fgColor: { rgb: "FFFFAA00" } }, // 黄色背景
-                border: { top: { style: "thin", color: { rgb: "FF000000" } } } // 黑色边框
-            };
+        ws["!cols"] = [{ wch: 10 }];
+        ws["!merges"] = buildMerges(headerData);
 
-            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-            XLSX.writeFile(wb, "SheetJSESMTest.xlsx");
+        const range = XLSX.utils.decode_range(ws["!ref"]);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+          for (let C = range.s.c; C <= range.e.c; ++C) {
+            // 表格坐标 二维数组
+            const cell_address = { r: R, c: C };
+            // 解析坐标 获得表格A1、A2
+            const cell_ref = XLSX.utils.encode_cell(cell_address);
+            if (!ws[cell_ref]) continue;
+            ws[cell_ref].s = cellStyle;
+          }
         }
-        
-    </script>
-</body>
+        specialCell &&
+          Object.keys(specialCell).forEach((key) => {
+            ws[key].s = specialCell[key];
+          });
 
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+        XLSX.writeFile(wb, `${title}.xlsx`);
+      }
+
+      function buildMerges(arr) {
+        if (!arr[0].length) return;
+
+        let merges = [];
+        let visited = new Array(arr.length)
+          .fill([])
+          .map((i) => new Array(arr[0].length).fill(0));
+          
+        for (let i = 0; i < arr.length; i++) {
+          for (let j = 0; j < arr[i].length; j++) {
+            if (visited[i][j]) continue;
+
+            let t = j;
+            // 行合并
+            while (arr[i][t + 1] && arr[i][t + 1] === arr[i][j]) {
+              visited[i][t + 1] = 1;
+              t++;
+            }
+            //行列会互斥
+            if (t !== j) {
+              merges.push({ s: { r: i, c: j }, e: { r: i, c: t } });
+            } else {
+              let w = i;
+              // 列合并
+              while (arr[w + 1] && arr[i][j] === arr[w + 1][j]) {
+                visited[w + 1][j] = 1;
+                w++;
+              }
+              if (w !== i) {
+                merges.push({ s: { r: i, c: j }, e: { r: w, c: j } });
+              }
+            }
+
+            visited[i][j] = 1;
+          }
+        }
+        return merges;
+      }
+    </script>
+  </body>
 </html>
