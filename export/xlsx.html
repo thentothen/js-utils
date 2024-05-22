@@ -22,11 +22,36 @@
         ["name", "age", "备注"],
       ];
       let bodyData = [
+        [1, 20, "123"],
+        [1, 18, "123"],
+        [1, 25, "123"],
+        [1, 30, "123"],
+      ];
+      let columns_ant = [
+        {
+          title: "总结",
+          children: [
+            { title: "备注2", dataIndex: "title" },
+            {
+              title: "信息",
+              children: [
+                { title: "name", dataIndex: "name" },
+                { title: "age", dataIndex: "age" },
+              ],
+            },
+            { title: "备注", dataIndex: "title" },
+          ],
+        },
+      ];
+      header = buildColums(columns_ant);
+
+      let data = [
         { name: 1, age: 20, title: "123" },
         { name: 1, age: 18, title: "123" },
         { name: 1, age: 25, title: "123" },
         { name: 1, age: 30, title: "123" },
       ];
+      bodyData = buildData(data, columns_ant);
 
       let cellStyle = {
         alignment: {
@@ -52,6 +77,10 @@
         },
       };
 
+      let specialCellFunc = function (obj) {
+        if (obj.age > 20) return "red";
+        if (obj.age < 20) return "green";
+      };
       function export1({
         title = "SheetJSESMTest",
         headerData = [],
@@ -60,9 +89,7 @@
         specialCellFunc = null,
       }) {
         const wb = XLSX.utils.book_new();
-        let data = headerData
-          .map((i) => i)
-          .concat(bodyData.map((obj) => Object.values(obj)));
+        let data = headerData.map((i) => i).concat(bodyData);
         const ws = XLSX.utils.aoa_to_sheet(data);
 
         ws["!cols"] = [{ wch: 10 }];
@@ -96,7 +123,7 @@
         let visited = new Array(arr.length)
           .fill([])
           .map((i) => new Array(arr[0].length).fill(0));
-          
+
         for (let i = 0; i < arr.length; i++) {
           for (let j = 0; j < arr[i].length; j++) {
             if (visited[i][j]) continue;
@@ -126,6 +153,72 @@
           }
         }
         return merges;
+      }
+
+      // 根据antd数据生成header
+      function buildColums(arr) {
+        let result = [];
+        let obj = [];
+        result.push(obj);
+        let index = 0;
+        arr.map((item) => {
+          if (item.children) {
+            let child = buildColums(item.children);
+
+            obj.push(...child[0].map((i) => item.title));
+
+            let prefix = [];
+            if (child.length !== obj.length) {
+              for (let i = 0; i < obj.length; i++) {
+                if (obj[i] !== item.title) prefix.push(obj[i]);
+              }
+            }
+            child[child.length - 1] = [...prefix, ...child.at(-1)];
+
+            result.push(...child);
+          } else {
+            obj.push(item.title);
+
+            let next = index + 1;
+            while (result[next]) {
+              if (result[next].length !== obj.length) {
+                result[next].push(item.title);
+              }
+              next++;
+            }
+          }
+        });
+        return result;
+      }
+      // 根据antd数据生成bodyData
+      function buildData(data, columns) {
+        let flatColumns = getLeaf(columns);
+        return data.map((item) => {
+          return flatColumns.map((i) => item[i.dataIndex]);
+        });
+      }
+      function getLeaf(tree) {
+        let result = [];
+        tree.forEach((item) => {
+          if (item.children) {
+            result.push(...getLeaf(item.children));
+          } else {
+            result.push({ ...item, children: null });
+          }
+        });
+        return result;
+      }
+      function findTreeNode(tree) {
+        let result = null;
+        tree.forEach((item) => {
+          if (item.value === value) {
+            result = result || item;
+          }
+          if (item.children) {
+            result = findTreeNode(item.children, value);
+          }
+        });
+        return result;
       }
     </script>
   </body>
