@@ -8,30 +8,32 @@
   <body>
     <span id="text"></span>
     <script>
-      async function t() {
-        async function a(time = 1000) {
-          return new Promise((resolve, reject) => {
-            setTimeout(() => {
-              document.querySelector("#text").innerText = document
-                .querySelector("#text")
-                .innerText.concat("2");
-              resolve();
-            }, time);
-          });
-        }
-        document.querySelector("#text").innerText = document
-          .querySelector("#text")
-          .innerText.concat("1");
-        a(2000);
-        return a(1000);
-      }
-      (async () => {
-        // t();
-        console.log(t());
-        document.querySelector("#text").innerText = document
-          .querySelector("#text")
-          .innerText.concat("4");
-      })();
+      /**
+       * promise1
+       * promise2
+       * resolvePromise resolved
+       * promise3
+       */
+      // resolve一个Promise对象时 相当于await Promise结束 且会默认执行执行一次其.then()方法
+      new Promise(async (resolve) => {
+        resolve(Promise.resolve()); // 隐含执行 resolve(Promise.resolve().then());
+        // 相当于
+        // await Promise.resolve().then();
+        // resolve();
+      }).then((res) => {
+        console.log("resolvePromise resolved");
+      });
+
+      Promise.resolve()
+        .then(() => {
+          console.log("promise1");
+        })
+        .then(() => {
+          console.log("promise2");
+        })
+        .then(() => {
+          console.log("promise3");
+        });
     </script>
   </body>
 </html>

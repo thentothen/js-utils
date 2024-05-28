@@ -10,7 +10,7 @@
   <body>
     <div>
       <button
-        onclick="export1({headerData:header, bodyData: bodyData, specialCell:specialCell})"
+        onclick="export1({headerData: buildHeaderData(columns_ant), bodyData: buildBodyData(data, columns_ant), specialCell:specialCell})"
       >
         export
       </button>
@@ -43,7 +43,6 @@
           ],
         },
       ];
-      header = buildColums(columns_ant);
 
       let data = [
         { name: 1, age: 20, title: "123" },
@@ -51,7 +50,6 @@
         { name: 1, age: 25, title: "123" },
         { name: 1, age: 30, title: "123" },
       ];
-      bodyData = buildData(data, columns_ant);
 
       let cellStyle = {
         alignment: {
@@ -156,14 +154,14 @@
       }
 
       // 根据antd数据生成header
-      function buildColums(arr) {
+      function buildHeaderData(arr) {
         let result = [];
         let obj = [];
         result.push(obj);
         let index = 0;
         arr.map((item) => {
           if (item.children) {
-            let child = buildColums(item.children);
+            let child = buildHeaderData(item.children);
 
             obj.push(...child[0].map((i) => item.title));
 
@@ -173,8 +171,8 @@
                 if (obj[i] !== item.title) prefix.push(obj[i]);
               }
             }
-            child[child.length - 1] = [...prefix, ...child.at(-1)];
 
+            child[child.length - 1] = [...prefix, ...child.at(-1)];
             result.push(...child);
           } else {
             obj.push(item.title);
@@ -191,7 +189,7 @@
         return result;
       }
       // 根据antd数据生成bodyData
-      function buildData(data, columns) {
+      function buildBodyData(data, columns) {
         let flatColumns = getLeaf(columns);
         return data.map((item) => {
           return flatColumns.map((i) => item[i.dataIndex]);
