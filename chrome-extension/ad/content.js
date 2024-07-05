@@ -1,18 +1,19 @@
 
+const timer = {}
 // 简书
 if (location.href.includes("jianshu")) {
   $("._2OwGUo").children(":last-child").css("display", "none");
   $("._3Pnjry").css("display", "none");
 
-  let timer = null;
+   timer.jianshu = null;
 
   let start = () => {
-    if (timer) return;
-    timer = setInterval(() => {
+    if (timer.jianshu) return;
+    timer.jianshu = setInterval(() => {
       $("._23ISFX-close")?.click();
     }, 500);
   };
-  let end = () => clearInterval(timer);
+  let end = () => clearInterval(timer.jianshu);
 
   function onFocus() {
     console.log("页面激活");
@@ -34,16 +35,16 @@ if (location.href.includes("jianshu")) {
 // CSDN
 if (location.href.includes("csdn")) {
   $("#asideWriteGuide").css("display", "none");
-  $("passport-login-tip-container").css("display", "none");
 
   var myId = "google_ads"; // 要匹配的ID部分文本
 
-  let timer = null;
+   timer.csdn = null;
 
   let start = () => {
-    if (timer) return;
+    if ( timer.csdn ) return;
 
-    timer = setInterval(() => {
+    timer.csdn  = setInterval(() => {
+      $(".passport-login-tip-container")?.css("display", "none");
       $("#passportbox > img")?.click();
       $('.programmer1Box').css('display', 'none');
       $('.box-shadow.mb8').css('display', 'none');
@@ -51,7 +52,7 @@ if (location.href.includes("csdn")) {
       $('#footerRightAds').css('display', 'none');
     }, 500);
   };
-  let end = () => clearInterval(timer);
+  let end = () => clearInterval( timer.csdn );
   function onFocus() {
     console.log("页面激活");
     // 执行页面激活时的代码
@@ -72,15 +73,16 @@ if (location.href.includes("csdn")) {
 //知乎
 if (location.href.includes("zhihu")){
   
-  let timer = null;
+   timer.zhifu = null;
   let start = () => {
-    if (timer) return;
+    if (timer.zhifu) return;
 
-    timer = setInterval(() => {
+    timer.zhifu = setInterval(() => {
+      $(".css-1wq6v87").css('display', 'none');
       $(".Button.Modal-closeButton.Button--plain")?.click();
     }, 500);
   };
-  let end = () => clearInterval(timer);
+  let end = () => clearInterval(timer.zhifu);
   function onFocus() {
     console.log("页面激活");
     // 执行页面激活时的代码
@@ -100,7 +102,7 @@ if (location.href.includes("zhihu")){
 
 chrome.runtime.onMessage.addListener((message, sender, sendBack)=>{
   if(message.action === 'cancle'){
-    
+    clearInterval(timer[message?.data])
     sendBack({message: 'ok'})
   }
   console.log(message, sender, sendBack);
