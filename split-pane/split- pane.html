@@ -6,18 +6,26 @@
     <title>Document</title>
   </head>
   <body>
-    <div id="split-pane">
-      <div id="split-left"></div>
+    <div
+      id="split-pane"
+      data-dragable="{dragable}"
+      style="user-select: 'dragable?none:auto'"
+    >
+      <div id="split-left">
+        <div>left content</div>
+        <div class="split-pane_shield" style="display: dragable"></div>
+      </div>
       <div id="split-bar"></div>
-      <div id="split-right"></div>
+      <div id="split-right">
+        <div>right content</div>
+        <div class="split-pane_shield" style="display: dragable"></div>
+      </div>
     </div>
     <script>
       let dragable = false;
-      let start = 0;
-      let move = 0;
+      const minWidth = 80;
+      const maxWidth = 800;
       const mousedown = (e) => {
-        console.log(e);
-        start = e.clientX;
         dragable = true;
       };
       const mouseup = () => {
@@ -33,17 +41,14 @@
       document.querySelector("#split-left").style.width = 300 + "px";
       document.onmousemove = (e) => {
         if (!dragable) return;
-        console.log(document.querySelector("#split-left"));
-        // move = e.clientX = start;
-        // start = e.clientX;
-        // console.log(
-        //   move / document.querySelector("#split-pane").clientWidth + "%"
-        // );
-        // document.querySelector("#split-left").style["flexBasic"] =
-        //   move / document.querySelector("#split-pane").clientWidth + "%";
-        document.querySelector("#split-left").style.width = e.clientX + "px";
+
+        if (e.clientX < minWidth || e.clientX > maxWidth) return;
+
+        document.querySelector("#split-left").style.width =
+          e.clientX - document.querySelector("#split-pane").offsetLeft + "px";
       };
     </script>
+
     <style>
       #split-pane {
         width: 100%;
@@ -72,6 +77,14 @@
         height: 100%;
         left: -4px;
         position: absolute;
+      }
+      .split-pane_shield {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: 10;
+        left: 0;
+        top: 0;
       }
     </style>
   </body>
