@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      button {
+        width: 200px;
+        height: 40px;
+        margin-bottom: 4px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      style="
+        margin: 0 auto;
+        width: 50%;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      "
+    >
+      <button onclick="var_for()">var_for</button>
+      <button onclick="let_for()">let_for</button>
+      <button onclick="let_for_outlet()">let_for_outlet</button>
+      <button onclick="let_for_outlet_fix1()">let_for_outlet_fix1</button>
+      <button onclick="let_for_outlet_fix2()">let_for_outlet_fix2</button>
+      <button onclick="let_for_outlet_fix3()">let_for_outlet_fix3</button>
+      <button onclick="let_for_creatclosure()">let_for_creatclosure</button>
+    </div>
+    <script>
+      /**
+       * 针对for循环i的不同声明方式探寻闭包问题
+       */
+
+      // 由于var的原因 打印出来全是10 断点产生闭包
+      function var_for() {
+        let fun = [];
+        for (var i = 0; i < 10; i++) {
+          fun[i] = function (params) {
+            // debugger;
+            console.log(i);
+          };
+        }
+        fun.forEach((i) => i());
+      }
+
+      // 修正var为let-打印正常-断点不产生闭包
+      function let_for() {
+        let fun = [];
+        for (let i = 0; i < 10; i++) {
+          fun[i] = function (params) {
+            // debugger;
+            console.log(i);
+          };
+        }
+        fun.forEach((i) => i());
+      }
+
+      // 将let提到外层函数变量申明区-打印全是10-产生闭包; 根据后面的实验发现这里将let提出来跟使用var声明是一样的效果
+      function let_for_outlet() {
+        let fun = [];
+        let i;
+        for (i = 0; i < 10; i++) {
+          fun[i] = function (params) {
+            // debugger;
+            console.log(i);
+          };
+        }
+        fun.forEach((i) => i());
+      }
+
+      // 块级包装修复-打印全是10-不产生闭包; 这里将块级作用域包装起来执行区，阻断了变量为函数执行上下文变量的条件，所以闭包消失，但是还是打印不对，因为由于访问的是上下文的前文变量所以最终打印指向同一对象
+      function let_for_outlet_fix1() {
+        let fun = [];
+        {
+          let i;
+          for (i = 0; i < 10; i++) {
+            fun[i] = function (params) {
+              // debugger;
+              console.log(i);
+            };
+          }
+        }
+        fun.forEach((i) => i());
+      }
+
+      // 闭包修复-打印正常-产生闭包; 修复完成，这里将特地产生闭包，但是闭包变量针对fun[i]函数那一次传进来的参数i从而保存声明时的i值，最终打印正确
+      function let_for_outlet_fix2() {
+        let fun = [];
+        let i;
+        for (i = 0; i < 10; i++) {
+          fun[i] = (function (i) {
+            return function () {
+              // debugger;
+              console.log(i);
+            };
+          })(i);
+        }
+        fun.forEach((i) => i());
+      }
+
+      // 转存修复-打印正常-不产生闭包; 这里将变量独立保存出来，由此打印正确，因为_i的块级不是函数跨级所以不会产生闭包
+      function let_for_outlet_fix3() {
+        let fun = [];
+        let i;
+        for (i = 0; i < 10; i++) {
+          let _i = i;
+          fun[i] = function (params) {
+            // debugger;
+            console.log(_i);
+          };
+        }
+        fun.forEach((i) => i());
+      }
+
+      // 还是let 打印正常 但是产生闭包; 这里创建闭包，但是由于变量是块级作用所以闭包变量为当前i值而不是最终i值
+      function let_for_creatclosure() {
+        let fun = [];
+        for (let i = 0; i < 10; i++) {
+          fun[i] = (function (i) {
+            return function () {
+              // debugger
+              console.log(i);
+            };
+          })(i);
+        }
+        fun.forEach((i) => i());
+      }
+
+      /**
+       * 结论：var的情况跟let提出来比较相似，故修复方案也类似
+       * for内部执行类似一种 function for(){
+       *    {
+       *      let i = 0;2,3,4,5...
+       *      cb();
+       *    }
+       * }
+       * let声明时不满足函数执行上下文变量这一条件，当变量变成var时，突破块级作用，变量作用域为函数上下文变量故可变成闭包变量，而且又是内部函数对变量的访问，故产生闭包。
+       *
+       * 最终结果的不同只跟调用指向的变量上下文值有关，有的指向到了全局变量区所以最终结果访问到同一值，有的指向到了闭包变量而闭包值又是在声明时产生所以能出现不同值
+       *
+       * 闭包能保存对执行上下文变量值的引用所以能保存不同全局变量不同阶段产生的值
+       *
+       * 只要满足闭包条件，且闭包变量值正确就能打印正确
+       */
+    </script>
+  </body>
+</html>
