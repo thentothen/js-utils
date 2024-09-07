@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      function demo() {
+        const bigArrayBuffer = new ArrayBuffer(100_000_000);
+
+        globalThis.innerFunc1 = () => {
+          console.log(bigArrayBuffer.byteLength);
+        };
+
+        globalThis.innerFunc2 = () => {
+          console.log("hello");
+        };
+      }
+
+      demo();
+      // bigArrayBuffer is retained, as expected.
+
+      globalThis.innerFunc1 = undefined;
+      // bigArrayBuffer is still retained, as unexpected.
+
+      globalThis.innerFunc2 = undefined;
+      // bigArrayBuffer can now be collected.
+    </script>
+  </body>
+</html>
