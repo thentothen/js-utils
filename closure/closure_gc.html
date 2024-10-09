@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="button" onclick="bb()">button</div>
+    <script>
+      function bb() {
+        return aa()();
+      }
+
+      function aa() {
+        let i = 0;
+        return function () {
+          i++;
+          console.log(i);
+        }; //当函数执行完时，闭包已回收
+      }
+    </script>
+  </body>
+</html>
