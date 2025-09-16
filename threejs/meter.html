@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Three.js 电表模型</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "./three.module.js";
+      import { OrbitControls } from "./OrbitControls.js";
+
+      // 基本设置
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf0f0f0);
+
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.set(5, 5, 10);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      scene.add(new THREE.AmbientLight(0x888888));
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(10, 10, 10);
+      scene.add(light);
+
+      // 电表主体
+      const body = new THREE.Mesh(
+        new THREE.BoxGeometry(4, 6, 2),
+        new THREE.MeshStandardMaterial({ color: 0xaaaaaa })
+      );
+      scene.add(body);
+
+      // 显示屏 (使用 canvas texture 显示文本)
+      const canvas = document.createElement("canvas");
+      canvas.width = 256;
+      canvas.height = 64;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#333399";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "32px sans-serif";
+      ctx.fillText("0", 10, 45);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const screen = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.5, 1),
+        new THREE.MeshStandardMaterial({ map: texture })
+      );
+      screen.position.set(0, 1.5, 1.01);
+      scene.add(screen);
+
+      let currentInput = "";
+
+      function updateScreen() {
+        ctx.fillStyle = "#333399";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "32px sans-serif";
+        ctx.fillText(currentInput || "0", 10, 45);
+        texture.needsUpdate = true;
+      }
+
+      // 创建按键
+      const keyLabels = [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "←",
+        "0",
+        "OK",
+      ];
+      const buttonSize = 0.4;
+      const gap = 0.1;
+      const cols = 3;
+      const startX = -((cols - 1) * (buttonSize + gap)) / 2;
+      const startY = -1.5;
+
+      const buttons = [];
+      const siliconeMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xaaaaaa, // 柔和浅灰色
+        roughness: 0.9, // 表面粗糙，避免镜面反射
+        metalness: 0.1, // 硅胶无金属感
+        transmission: 0.3, // 略微透光（仅在 transparent=true 时生效）
+        thickness: 0.2,
+        transparent: true,
+        opacity: 0.95, // 略微透明
+        clearcoat: 0.5, // 提高表面光滑度
+        reflectivity: 0.1,
+      });
+      keyLabels.forEach((label, i) => {
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+
+        const btn = new THREE.Mesh(
+          new THREE.BoxGeometry(buttonSize, buttonSize, 0.2),
+          siliconeMaterial
+        );
+        btn.position.set(
+          startX + col * (buttonSize + gap),
+          startY - row * (buttonSize + gap),
+          1.01
+        );
+        btn.userData.label = label;
+        scene.add(btn);
+        buttons.push(btn);
+
+        // 按钮文字（简化处理）
+        const canvasBtn = document.createElement("canvas");
+        canvasBtn.width = 64;
+        canvasBtn.height = 64;
+        const ctxBtn = canvasBtn.getContext("2d");
+        ctxBtn.fillStyle = "#444444";
+        ctxBtn.fillRect(0, 0, 64, 64);
+        ctxBtn.fillStyle = "#ffffff";
+        ctxBtn.font = "28px sans-serif";
+        ctxBtn.textAlign = "center";
+        ctxBtn.textBaseline = "middle";
+        ctxBtn.fillText(label, 32, 36);
+
+        const btnTexture = new THREE.CanvasTexture(canvasBtn);
+        const btnLabel = new THREE.Mesh(
+          new THREE.PlaneGeometry(buttonSize, buttonSize),
+          new THREE.MeshBasicMaterial({ map: btnTexture, transparent: true })
+        );
+        btnLabel.position.copy(btn.position);
+        btnLabel.position.z += 0.11;
+        scene.add(btnLabel);
+      });
+
+      // 光线投射器用于检测点击
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+
+      function onClick(event) {
+        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(pointer, camera);
+        const intersects = raycaster.intersectObjects(buttons);
+
+        if (intersects.length > 0) {
+          const label = intersects[0].object.userData.label;
+          if (label === "←") {
+            currentInput = currentInput.slice(0, -1);
+          } else if (label === "OK") {
+            alert("确认输入: " + currentInput);
+            currentInput = "";
+          } else {
+            currentInput += label;
+          }
+          updateScreen();
+        }
+      }
+
+      window.addEventListener("click", onClick);
+
+      // 动画循环
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
