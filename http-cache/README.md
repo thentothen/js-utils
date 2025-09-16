@@ -62,3 +62,21 @@ Pragma: no-cache
 - **响应头跟请求头的相应字段匹配来判定是否触发缓存，响应字段 ETag / Last-Modified 对应请求字段 If-None-Match / If-Modified-Since**
 
 - **优先级 ETag->Last-Modified**
+
+#### 1. ETag / If-None-Match
+
+响应头：ETag: "abc123"
+
+浏览器下次请求时带：If-None-Match: "abc123"
+
+服务器对比 ETag：一样 → 返回 304, 不一样 → 返回新资源 200 OK + 新的 ETag
+
+---
+
+#### 2. Last-Modified / If-Modified-Since
+
+响应头：Last-Modified: Tue, 16 Sep 2025 08:00:00 GMT
+
+浏览器下次请求时带：If-Modified-Since: Tue, 16 Sep 2025 08:00:00 GMT
+
+服务器比较文件的最后修改时间：没变 → 返回 304 Not Modified, 变了 → 返回新资源 200 OK + 新的 Last-Modified
